@@ -17,18 +17,21 @@ package org.gradle.kotlin.dsl.provider
 
 import org.gradle.api.Project
 import org.gradle.api.initialization.Settings
+import org.gradle.api.invocation.Gradle
 
 import org.gradle.internal.classpath.ClassPath
 
 import org.gradle.kotlin.dsl.KotlinBuildScript
+import org.gradle.kotlin.dsl.KotlinInitScript
 import org.gradle.kotlin.dsl.KotlinSettingsScript
-
-import org.gradle.kotlin.dsl.support.KotlinBuildscriptBlock
-import org.gradle.kotlin.dsl.support.KotlinPluginsBlock
-import org.gradle.kotlin.dsl.support.KotlinSettingsBuildscriptBlock
 
 import org.gradle.kotlin.dsl.accessors.AccessorsClassPath
 import org.gradle.kotlin.dsl.accessors.accessorsClassPathFor
+
+import org.gradle.kotlin.dsl.support.KotlinBuildscriptBlock
+import org.gradle.kotlin.dsl.support.KotlinInitscriptBlock
+import org.gradle.kotlin.dsl.support.KotlinPluginsBlock
+import org.gradle.kotlin.dsl.support.KotlinSettingsBuildscriptBlock
 
 import java.lang.IllegalArgumentException
 
@@ -40,6 +43,7 @@ fun kotlinScriptTargetFor(target: Any, topLevelScript: Boolean): KotlinScriptTar
     when (target) {
         is Project  -> projectScriptTarget(target, topLevelScript)
         is Settings -> settingsScriptTarget(target, topLevelScript)
+        is Gradle   -> gradleScriptTarget(target)
         else        -> unsupportedTarget(target)
     }
 
@@ -77,6 +81,16 @@ fun projectScriptTarget(project: Project, topLevelScript: Boolean): KotlinScript
 
 
 private
+fun gradleScriptTarget(gradle: Gradle) =
+    KotlinScriptTarget(
+        gradle,
+        type = Gradle::class,
+        scriptTemplate = KotlinInitScript::class,
+        buildscriptBlockTemplate = KotlinInitscriptBlock::class,
+        buildscriptBlockName = "initscript")
+
+
+private
 fun accessorsClassPathProviderFor(project: Project, topLevelScript: Boolean): AccessorsClassPathProvider =
     if (topLevelScript) { classPath -> accessorsClassPathFor(project, classPath) }
     else emptyAccessorsClassPathProvider
@@ -98,7 +112,8 @@ data class KotlinScriptTarget<T : Any>(
     val buildscriptBlockTemplate: KClass<*>?,
     val pluginsBlockTemplate: KClass<*>? = null,
     val accessorsClassPath: AccessorsClassPathProvider = emptyAccessorsClassPathProvider,
-    val prepare: () -> Unit = {}) {
+    val prepare: () -> Unit = {},
+    val buildscriptBlockName: String = "buildscript") {
 
     fun accessorsClassPathFor(classPath: ClassPath) = accessorsClassPath(classPath)
 }

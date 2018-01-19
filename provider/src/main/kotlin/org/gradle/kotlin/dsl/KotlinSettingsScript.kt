@@ -43,6 +43,9 @@ import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.api.internal.file.DefaultFileOperations
 import org.gradle.api.internal.file.FileLookup
 import org.gradle.api.internal.file.collections.DirectoryFileTreeFactory
+
+import org.gradle.api.invocation.Gradle
+
 import org.gradle.internal.hash.FileHasher
 import org.gradle.internal.hash.StreamHasher
 import org.gradle.internal.reflect.Instantiator
@@ -385,16 +388,21 @@ abstract class KotlinSettingsScript(settings: Settings) : Settings by settings {
 
 
 private
-fun fileOperationsFor(settings: Settings): DefaultFileOperations {
-    val fileLookup = settings.serviceOf<FileLookup>()
+fun fileOperationsFor(settings: Settings): DefaultFileOperations =
+    fileOperationsFor(settings.gradle, settings.rootDir)
+
+
+internal
+fun fileOperationsFor(gradle: Gradle, baseDir: File): DefaultFileOperations {
+    val fileLookup = gradle.serviceOf<FileLookup>()
     return DefaultFileOperations(
-        fileLookup.getFileResolver(settings.rootDir),
+        fileLookup.getFileResolver(baseDir),
         null,
         null,
-        settings.serviceOf<Instantiator>(),
+        gradle.serviceOf<Instantiator>(),
         fileLookup,
-        settings.serviceOf<DirectoryFileTreeFactory>(),
-        settings.serviceOf<StreamHasher>(),
-        settings.serviceOf<FileHasher>(),
-        settings.serviceOf<ExecFactory>())
+        gradle.serviceOf<DirectoryFileTreeFactory>(),
+        gradle.serviceOf<StreamHasher>(),
+        gradle.serviceOf<FileHasher>(),
+        gradle.serviceOf<ExecFactory>())
 }
