@@ -1,6 +1,5 @@
 plugins {
-    id("com.android.application") version "3.1.0"
-    kotlin("android") version "1.2.41"
+    id("com.android.library") version "3.1.0"
 }
 
 android {
@@ -8,9 +7,8 @@ android {
 
     defaultConfig {
         minSdkVersion(15)
-        targetSdkVersion(27)
 
-        applicationId = "com.example.kotlingradle"
+        targetSdkVersion(27)
         versionCode = 1
         versionName = "1.0"
     }
@@ -25,9 +23,6 @@ android {
 
 dependencies {
     implementation("com.android.support:appcompat-v7:27.0.1")
-    implementation("com.android.support.constraint:constraint-layout:1.0.2")
-    implementation(kotlin("stdlib", "1.2.41"))
-    implementation(project(":lib"))
 }
 
 repositories {

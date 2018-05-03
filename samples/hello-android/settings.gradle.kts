@@ -5,7 +5,7 @@ pluginManagement {
     }
     resolutionStrategy {
         eachPlugin {
-            if (requested.id.id == "com.android.application") {
+            if (requested.id.id.startsWith("com.android.")) {
                 useModule("com.android.tools.build:gradle:${requested.version}")
             }
         }
@@ -13,4 +13,4 @@ pluginManagement {
 }
 
 rootProject.buildFileName = "build.gradle.kts"
-include("app")
+include("app", "lib")
